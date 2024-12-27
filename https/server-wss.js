@@ -5,12 +5,8 @@ const WebSocket = require("ws");
 
 // Read the SSL certificate and private key
 const serverOptions = {
-  key: fs.readFileSync(
-    "/home/dev/Desktop/ssl_phi/ws-con/wss-cert/private-key.pem"
-  ), // Replace with the path to your private key
-  cert: fs.readFileSync(
-    "/home/dev/Desktop/ssl_phi/ws-con/wss-cert/certificate.pem"
-  ), // Replace with the path to your certificate
+  key: fs.readFileSync("wss-cert/private-key.pem"), // Replace with the path to your private key
+  cert: fs.readFileSync("wss-cert/certificate.pem"), // Replace with the path to your certificate
 };
 
 // Create an HTTPS server

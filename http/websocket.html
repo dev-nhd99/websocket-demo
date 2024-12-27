@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Example</title>
+</head>
+
+<body>
+    <h1>WebSocket Client</h1>
+
+    <!-- Input for WebSocket URL -->
+    <div>
+        <input type="text" id="wsUrl" placeholder="Enter WebSocket URL" value="ws://localhost:6432">
+        <button onclick="connectWebSocket()">Connect</button>
+    </div>
+
+    <!-- Log Display -->
+    <div>
+        <textarea id="log" rows="10" cols="50" readonly></textarea>
+    </div>
+
+    <!-- Message Input -->
+    <div>
+        <input type="text" id="message" placeholder="Enter your message">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        let socket = null;  // WebSocket variable to hold the connection
+
+        const log = document.getElementById('log');
+        const appendLog = (message) => {
+            log.value += message + '\n';
+        };
+
+        // Function to connect to WebSocket with the user-provided URL
+        function connectWebSocket() {
+            const wsUrl = document.getElementById('wsUrl').value;
+
+            // Check if WebSocket is already connected
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                appendLog('Already connected.');
+                return;
+            } else {
+                appendLog('Error connected.')
+            }
+
+            // Create a new WebSocket connection
+            socket = new WebSocket(wsUrl);
+
+            // When the connection opens
+            socket.addEventListener('open', () => {
+                appendLog('Connected to WebSocket server: ' + wsUrl);
+            });
+
+            // When a message is received from the server
+            socket.addEventListener('message', (event) => {
+                blobToHex(event.data).then((hexString) => {
+                    appendLog('Server: ' + hexString);
+                }).catch((error) => {
+                    appendLog('Server: ' + error);
+                });
+            });
+
+            // When the connection is closed
+            socket.addEventListener('close', () => {
+                appendLog('Connection closed.');
+            });
+
+            // When an error occurs
+            socket.addEventListener('error', (error) => {
+                appendLog('WebSocket error: ' + error);
+                console.log(error)
+            });
+        }
+
+        // Function to convert blob to hex string
+        function blobToHex(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+
+                // Read the blob as an ArrayBuffer
+                reader.onload = function (event) {
+                    const arrayBuffer = event.target.result;
+                    const byteArray = new Uint8Array(arrayBuffer);
+                    const hexString = Array.from(byteArray, byte => byte.toString(16).padStart(2, '0')).join('');
+                    resolve(hexString);
+                };
+
+                // Handle errors
+                reader.onerror = function () {
+                    reject(reader.error);
+                };
+
+                // Start reading the blob
+                reader.readAsArrayBuffer(blob);
+            });
+        }
+
+        // Function to convert hex string to byte array
+        function hexToBytes(hex) {
+            const bytes = [];
+            for (let i = 0; i < hex.length; i += 2) {
+                bytes.push(parseInt(hex.substring(i, i + 2), 16));
+            }
+            return new Uint8Array(bytes); // Return as Uint8Array
+        }
+
+        // Function to send a message to the server
+        function sendMessage() {
+            const message = document.getElementById('message').value;
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                var byteArray = hexToBytes(message);
+                socket.send(byteArray);
+                appendLog('You: ' + message);
+            } else {
+                appendLog('WebSocket is not connected.');
+            }
+        }
+    </script>
+</body>
+
+</html>
