@@ -1,0 +1,10 @@
+{
+    "liveServer.settings.root": "/",
+    "liveServer.settings.https": {
+      "enable": true,
+      "cert": "/home/dev/Desktop/ssl_phi/ws-con/certificate/localhost.pem",
+      "key": "/home/dev/Desktop/ssl_phi/ws-con/certificate/localhost.key",
+      "passphrase": "123456"
+    }
+}
+  
